@@ -1,0 +1,52 @@
+// prisma/schema.prisma
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "sqlite"
+  
+}
+
+// 1. Modelo de Utilizador (Para Autenticação)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Senha criptografada
+  name      String?
+  createdAt DateTime @default(now())
+
+  // Relacionamento: Um utilizador tem vários documentos
+  documents Document[]
+}
+
+// 2. Modelo de Documento (Para o Upload e OCR)
+model Document {
+  id            String   @id @default(uuid())
+  fileName      String   // Nome original do ficheiro (ex: fatura.pdf)
+  mimeType      String   // Tipo do ficheiro (ex: image/png, application/pdf)
+  storagePath   String   // Caminho onde guardamos o ficheiro na pasta local
+  extractedText String?  // O texto que o Google Vision vai retornar
+  createdAt     DateTime @default(now())
+  
+  // Relacionamento com Utilizador
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  // Relacionamento com Interações da IA
+  interactions  LLMInteraction[]
+}
+
+// 3. Modelo de Interação (Para o Chat com LLM)
+model LLMInteraction {
+  id          String   @id @default(uuid())
+  userPrompt  String   // A pergunta que o utilizador fez
+  llmResponse String   // A resposta que a IA deu
+  createdAt   DateTime @default(now())
+
+  // Relacionamento: Toda a pergunta pertence a um documento específico
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id])
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste de Upload Paggo</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        input, button { width: 100%; padding: 0.5rem; }
+        button { background: #0070f3; color: white; border: none; cursor: pointer; margin-top: 1rem; }
+        button:hover { background: #0051a2; }
+        #resultado { margin-top: 2rem; background: #f4f4f4; padding: 1rem; white-space: pre-wrap; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>⚡ Teste de Upload e OCR</h2>
+    
+    <div class="form-group">
+        <label>1. Cole o seu Token (access_token):</label>
+        <input type="text" id="token" placeholder="eyJhbGciOiJIUzI1NiIs...">
+    </div>
+
+    <div class="form-group">
+        <label>2. Escolha a Fatura (Imagem):</label>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <button onclick="fazerUpload()">Enviar para o Backend</button>
+
+    <h3>Resultado:</h3>
+    <div id="resultado">Aguardando envio...</div>
+
+    <script>
+        async function fazerUpload() {
+            const token = document.getElementById('token').value;
+            const fileInput = document.getElementById('fileInput');
+            const resultadoDiv = document.getElementById('resultado');
+
+            if (!token) return alert('Por favor, cole o Token!');
+            if (fileInput.files.length === 0) return alert('Selecione um arquivo!');
+
+            resultadoDiv.innerText = 'Enviando... (Aguarde o OCR)';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://localhost:3000/documents/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultadoDiv.innerHTML = `✅ <strong>Sucesso!</strong><br><br><strong>Texto Extraído:</strong><br>${data.extractedText}`;
+                    console.log(data);
+                } else {
+                    resultadoDiv.innerText = `❌ Erro: ${data.message || 'Desconhecido'}`;
+                }
+            } catch (error) {
+                resultadoDiv.innerText = `❌ Erro de conexão: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
