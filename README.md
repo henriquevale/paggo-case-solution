@@ -109,4 +109,25 @@ LLM: Utilizou-se o Google Gemini (versão Flash) pela rapidez e generosidade do 
 
 Banco de Dados: SQLite foi escolhido pela simplicidade de configuração local, dispensando a necessidade de instalar Docker ou Postgres na máquina do avaliador.
 
+## Observações técnicas importantes
+
+Como a aplicação está hospedada em planos gratuitos (Render e Vercel),
+existem algumas limitações no ambiente de produção:
+
+A) "Cold Start" (Latência Inicial):
+   O servidor Backend (Render) entra em modo de espera após 15 minutos
+   sem uso. O primeiro login pode demorar cerca de 60 segundos para
+   responder enquanto o servidor reinicia.
+
+B) Persistência de Dados (SQLite):
+   Para cumprir os requisitos de facilidade de execução local, o projeto
+   utiliza SQLite (banco em arquivo). Em servidores "Serverless" gratuitos,
+   os arquivos são resetados ao reiniciar.
+   *Nota: Por isso, recomenda-se criar uma conta nova ao testar.*
+
+C) Limites da IA (Erro 429):
+   O sistema utiliza a API gratuita do Google Gemini. Caso apareça o erro
+   "429 Resource Exhausted", significa que o limite de requisições por
+   minuto da Google foi atingido. Basta aguardar 1 minuto.
+
 Developed by Henrique Rodrigues do Vale
